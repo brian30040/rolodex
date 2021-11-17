@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rolodex - Quarkus Hibernate ORM with Panache</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/wingcss/0.1.8/wing.min.css"/>
+    <style>
+        input[type=number] {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            -webkit-transition: .5s;
+            transition: .5s;
+            outline: 0;
+            font-family: 'Open Sans', serif;
+        }
+    </style>
+    <!-- Load AngularJS -->
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script type="text/javascript">
+        var app = angular.module("ContactManagement", []);
+
+        //Controller Part
+        app.controller("ContactManagementController", function ($scope, $http) {
+
+            //Initialize page with default data which is blank in this example
+            $scope.contacts = [];
+
+            $scope.form = {
+                id: -1,
+                name: ""
+            };
+
+            //Now load the data from server
+            _refreshPageData();
+
+            //HTTP POST/PUT methods for add/edit contacts
+            $scope.update = function () {
+                var method = "";
+                var url = "";
+                var data = {};
+                if ($scope.form.id == -1) {
+                    //Id is absent so add contacts - POST operation
+                    method = "POST";
+                    url = '/contacts';
+                    data.name = $scope.form.name;
+                } else {
+                    //If Id is present, it's edit operation - PUT operation
+                    method = "PUT";
+                    url = '/contacts/' + $scope.form.id;
+                    data.name = $scope.form.name;
+                }
+
+                $http({
+                    method: method,
+                    url: url,
+                    data: angular.toJson(data),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(_success, _error);
+            };
+
+            //HTTP DELETE- delete contact by id
+            $scope.remove = function (contact) {
+                $http({
+                    method: 'DELETE',
+                    url: '/contacts/' + contact.id
+                }).then(_success, _error);
+            };
+
+            //In case of edit contacts, populate form with contact data
+            $scope.edit = function (contact) {
+                $scope.form.name = contact.name;
+                $scope.form.id = contact.id;
+            };
+
+            /* Private Methods */
+            //HTTP GET- get all contacts collection
+            function _refreshPageData() {
+                $http({
+                    method: 'GET',
+                    url: '/contacts'
+                }).then(function successCallback(response) {
+                    $scope.contacts = response.data;
+                }, function errorCallback(response) {
+                    console.log(response.statusText);
+                });
+            }
+
+            function _success(response) {
+                _refreshPageData();
+                _clearForm()
+            }
+
+            function _error(response) {
+                alert(response.data.message || response.statusText);
+            }
+
+            //Clear the form
+            function _clearForm() {
+                $scope.form.name = "";
+                $scope.form.id = -1;
+            }
+        });
+    </script>
+</head>
+<body ng-app="ContactManagement" ng-controller="ContactManagementController">
+
+<div class="container">
+    <h1>Rolodex</h1>
+    <p>Hibernate ORM with Panache - Quarkus
+
+    <h3>Add/Edit a contact</h3>
+    <form ng-submit="update()">
+        <div class="row">
+            <div class="col-6"><input type="text" placeholder="Name" ng-model="form.name" size="60"/></div>
+        </div>
+        <input type="submit" value="Save"/>
+    </form>
+
+    <h3>Contact List</h3>
+    <div class="row">
+        <div class="col-2">Name</div>
+    </div>
+    <div class="row" ng-repeat="contact in contacts">
+        <div class="col-2">{{ contact.name }}</div>
+        <div class="col-8"><a ng-click="edit( contact )" class="btn">Edit</a> <a ng-click="remove( contact )" class="btn">Remove</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
