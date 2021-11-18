@@ -1,0 +1,20 @@
+version: "3"
+services:
+  mysql:
+    container_name: mysql
+    image: mysql:latest
+    volumes:
+     - /opt/apps/mysql/quarkus:/var/lib/mysql
+    environment:
+     - MYSQL_DATABASE=rolodex_db
+     - MYSQL_ROOT_PASSWORD=password
+     - MYSQL_USER=rolodex
+     - MYSQL_PASSWORD=password
+     - TZ=US/Eastern
+    ports:
+    - 3306:3306
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+    - 8081:8080

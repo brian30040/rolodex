@@ -1,7 +1,7 @@
 
 DROP TABLE IF EXISTS phone;
-DROP TABLE IF EXISTS contact;
 DROP TABLE IF EXISTS address;
+DROP TABLE IF EXISTS contact;
 
 CREATE TABLE contact
 (
